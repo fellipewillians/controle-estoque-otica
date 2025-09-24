@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Estoque - Ótica Premium</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1><i class="fas fa-glasses"></i> Ótica Premium</h1>
+                <p>Sistema de Controle de Estoque</p>
+            </div>
+            <div class="total-value">
+                <span>Valor Total do Estoque</span>
+                <span id="totalValue" class="value">R$ 0,00</span>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="nav-tabs">
+            <button class="tab-btn active" onclick="showTab('produtos')">
+                <i class="fas fa-box"></i> 
+                <span>Produtos</span>
+            </button>
+            <button class="tab-btn" onclick="showTab('graficos')">
+                <i class="fas fa-chart-bar"></i> 
+                <span>Gráficos</span>
+            </button>
+            <button class="tab-btn" onclick="showTab('movimentacao')">
+                <i class="fas fa-exchange-alt"></i> 
+                <span>Movimentação</span>
+            </button>
+        </nav>
+
+        <!-- Produtos Tab -->
+        <div id="produtos" class="tab-content active">
+            <div class="section">
+                <h2><i class="fas fa-plus-circle"></i> Cadastro de Produtos</h2>
+                <form id="productForm" class="product-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="nome"><i class="fas fa-tag"></i> Nome do Produto</label>
+                            <input type="text" id="nome" placeholder="Ex: Armação Ray-Ban" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="categoria"><i class="fas fa-list"></i> Categoria</label>
+                            <select id="categoria" required>
+                                <option value="">Selecione uma categoria...</option>
+                                <option value="armacao">🕶️ Armação</option>
+                                <option value="lente">👁️ Lente</option>
+                                <option value="acessorio">🔧 Acessório</option>
+                                <option value="ferramenta">⚒️ Ferramenta</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="quantidade"><i class="fas fa-cubes"></i> Quantidade</label>
+                            <input type="number" id="quantidade" min="0" placeholder="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="preco"><i class="fas fa-dollar-sign"></i> Preço Unitário</label>
+                            <input type="number" id="preco" step="0.01" min="0" placeholder="0,00" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="fornecedor"><i class="fas fa-truck"></i> Fornecedor</label>
+                            <input type="text" id="fornecedor" placeholder="Ex: Luxottica">
+                        </div>
+                        <div class="form-group">
+                            <label for="estoqueMinimo"><i class="fas fa-exclamation-triangle"></i> Estoque Mínimo</label>
+                            <input type="number" id="estoqueMinimo" min="0" value="5" placeholder="5">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-plus"></i> 
+                        <span>Adicionar Produto</span>
+                    </button>
+                </form>
+            </div>
+
+            <div class="section">
+                <h2><i class="fas fa-inventory"></i> Lista de Produtos</h2>
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="🔍 Buscar produtos...">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="table-container">
+                    <table id="productsTable">
+                        <thead>
+                            <tr>
+                                <th>Produto</th>
+                                <th>Categoria</th>
+                                <th>Quantidade</th>
+                                <th>Preço Unit.</th>
+                                <th>Valor Total</th>
+                                <th>Fornecedor</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productsTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráficos Tab -->
+        <div id="graficos" class="tab-content">
+            <div class="charts-container">
+                <div class="chart-section">
+                    <h3><i class="fas fa-chart-pie"></i> Distribuição por Categoria</h3>
+                    <canvas id="categoryChart"></canvas>
+                </div>
+                <div class="chart-section">
+                    <h3><i class="fas fa-chart-bar"></i> Valor por Categoria</h3>
+                    <canvas id="valueChart"></canvas>
+                </div>
+                <div class="chart-section">
+                    <h3><i class="fas fa-exclamation-triangle"></i> Estoque Baixo</h3>
+                    <canvas id="lowStockChart"></canvas>
+                </div>
+                <div class="chart-section">
+                    <h3><i class="fas fa-chart-line"></i> Evolução do Estoque</h3>
+                    <canvas id="evolutionChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Movimentação Tab -->
+        <div id="movimentacao" class="tab-content">
+            <div class="section">
+                <h2><i class="fas fa-exchange-alt"></i> Movimentação de Estoque</h2>
+                <form id="movementForm" class="movement-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="produtoMovimento"><i class="fas fa-box"></i> Produto</label>
+                            <select id="produtoMovimento" required>
+                                <option value="">Selecione um produto...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="tipoMovimento"><i class="fas fa-arrows-alt-v"></i> Tipo de Movimento</label>
+                            <select id="tipoMovimento" required>
+                                <option value="">Selecione o tipo...</option>
+                                <option value="entrada">📈 Entrada (Compra/Reposição)</option>
+                                <option value="saida">📉 Saída (Venda/Uso)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="quantidadeMovimento"><i class="fas fa-hashtag"></i> Quantidade</label>
+                            <input type="number" id="quantidadeMovimento" min="1" placeholder="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="observacao"><i class="fas fa-sticky-note"></i> Observação</label>
+                            <input type="text" id="observacao" placeholder="Ex: Venda para cliente João">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-save"></i> 
+                        <span>Registrar Movimentação</span>
+                    </button>
+                </form>
+            </div>
+
+            <div class="section">
+                <h2><i class="fas fa-history"></i> Histórico de Movimentações</h2>
+                <div class="table-container">
+                    <table id="movementsTable">
+                        <thead>
+                            <tr>
+                                <th>Data/Hora</th>
+                                <th>Produto</th>
+                                <th>Tipo</th>
+                                <th>Quantidade</th>
+                                <th>Observação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="movementsTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Edição -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2><i class="fas fa-edit"></i> Editar Produto</h2>
+            <form id="editForm">
+                <input type="hidden" id="editId">
+                <div class="form-group">
+                    <label for="editNome">Nome do Produto</label>
+                    <input type="text" id="editNome" required>
+                </div>
+                <div class="form-group">
+                    <label for="editCategoria">Categoria</label>
+                    <select id="editCategoria" required>
+                        <option value="armacao">🕶️ Armação</option>
+                        <option value="lente">👁️ Lente</option>
+                        <option value="acessorio">🔧 Acessório</option>
+                        <option value="ferramenta">⚒️ Ferramenta</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editQuantidade">Quantidade</label>
+                    <input type="number" id="editQuantidade" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="editPreco">Preço Unitário</label>
+                    <input type="number" id="editPreco" step="0.01" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="editFornecedor">Fornecedor</label>
+                    <input type="text" id="editFornecedor">
+                </div>
+                <div class="form-group">
+                    <label for="editEstoqueMinimo">Estoque Mínimo</label>
+                    <input type="number" id="editEstoqueMinimo" min="0">
+                </div>
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-save"></i> Salvar Alterações
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
